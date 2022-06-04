@@ -10,7 +10,9 @@ int str_len(const char *s)
 
 char *str_chr(char *s, int c)
 {
-    int i = 0;
+    int i;
+
+    i = 0;
     while (s[i])
     {
         if (s[i] == (char)c)
@@ -41,8 +43,11 @@ char    *str_n_dup(const char *s, int n)
 
 char    *str_dup(const char *s)
 {
-    int len = str_len(s);
-    char    *tmp = malloc(sizeof(*tmp) * (len + 1));
+    char    *tmp;
+    int len;
+
+    len = str_len(s);
+    tmp = malloc(sizeof(*tmp) * (len + 1));
     int i = 0;
     while (i < len)
     {
@@ -55,11 +60,17 @@ char    *str_dup(const char *s)
 
 char	*str_join(char const *s1, char const *s2)
 {
-    char *s = malloc(sizeof(*s) * (str_len(s1) + str_len(s2) + 1));
-    int i = -1;
+    char *s;
+    int i;
+    int j;
+
+    if (!s1 || !s2)
+        return ((void *) 0);
+    s = malloc(sizeof(*s) * (str_len(s1) + str_len(s2) + 1));
+    i = -1;
     while (s1[++i])
         s[i] = s1[i];
-    int j = -1;
+    j = -1;
     while (s2[++j])
         s[i + j] = s2[j];
     s[i + j] = '\0';
@@ -69,16 +80,20 @@ char	*str_join(char const *s1, char const *s2)
 int	ft_read(int fd, char **reminder)
 {
     char	buff[BUFFER_SIZE + 1];
-    char	*tmp = (void *) 0;
+    char	*tmp;
+    int r;
 
     if (!*reminder)
     {
         *reminder = malloc(sizeof(**reminder) * 1);
         *reminder[0] = '\0';
     }
-    int r;
-    while (!str_chr(*reminder, '\n') && (r = read(fd, buff, BUFFER_SIZE)) > 0)
+    r = 1;
+    while (!str_chr(*reminder, '\n') && r > 0)
     {
+        r = read(fd, buff, BUFFER_SIZE);
+        if (r == -1)
+            return (-1);
         buff[r] = '\0';
         tmp = str_join(*reminder, buff);
         free(*reminder);
@@ -89,16 +104,16 @@ int	ft_read(int fd, char **reminder)
 
 char	*extract_word(char **reminder)
 {
-    char    *line = (void *) 0;
-    char    *tmp = (void *) 0;
+    char    *line;
+    char    *tmp;
 
     int len = 0;
     while (reminder[0][len] != '\0' && reminder[0][len] != '\n')
         len++;
-    if (reminder[0][len] == '\0')
-    {
+    line = (void *) 0;
+    tmp = (void *) 0;
+    if (len > 0 && reminder[0][len] == '\0')
         line = str_dup(*reminder);
-    }
     else if (reminder[0][len] == '\n')
     {
         line = str_n_dup(*reminder, len + 1);
